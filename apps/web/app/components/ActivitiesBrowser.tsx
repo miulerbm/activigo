@@ -53,7 +53,7 @@ export function ActivitiesBrowser({ activities }: { activities: Activity[] }) {
           Actividades
         </h1>
         <p className="text-sm text-slate-500 dark:text-slate-400">
-          Anotate a lo que te copa, o proponé algo nuevo.
+          Anótate a lo que te guste, o propón algo nuevo.
         </p>
       </div>
 

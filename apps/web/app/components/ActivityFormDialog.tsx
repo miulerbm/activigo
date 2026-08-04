@@ -97,7 +97,7 @@ export function ActivityFormDialog({
       toast.error(
         typeof firstMessage === "string"
           ? firstMessage
-          : "Revisá los datos del formulario",
+          : "Revisa los datos del formulario",
       );
     },
   );

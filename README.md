@@ -12,7 +12,7 @@ App para publicar actividades recreativas a un grupo cerrado de amigos, comparti
 ## Requisitos
 
 - Node.js 20+ (ver `.nvmrc`)
-- pnpm 9+ (`corepack enable` si no lo tenés instalado)
+- pnpm 9+ (`corepack enable` si no lo tienes instalado)
 - Una base de datos Postgres (se recomienda un proyecto de [Supabase](https://supabase.com))
 
 ## Setup local
@@ -72,7 +72,7 @@ La app se despliega gratis en dos servicios separados: **Vercel** para `apps/web
 
 ### 1. Backend (`apps/api`) en Render
 
-1. Crear cuenta en [Render](https://render.com) (podés loguearte directo con GitHub).
+1. Crear cuenta en [Render](https://render.com) (puedes iniciar sesión directo con GitHub).
 2. **New +** → **Web Service**, y conectar el repo `miulerbm/activigo`.
 3. Configuración:
    - **Root Directory**: dejar vacío (raíz del repo — así `pnpm` resuelve bien el workspace).

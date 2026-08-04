@@ -58,7 +58,7 @@ export function SuggestionForm() {
         <Textarea
           id="description"
           rows={4}
-          placeholder="Contanos de qué se trata, dónde, cuándo más o menos..."
+          placeholder="Cuéntanos de qué se trata, dónde, cuándo más o menos..."
           className="mt-1"
           {...register("description")}
         />
