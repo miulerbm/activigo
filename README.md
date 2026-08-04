@@ -68,7 +68,7 @@ App para publicar actividades recreativas a un grupo cerrado de amigos, comparti
 
 La app se despliega gratis en dos servicios separados: **Vercel** para `apps/web` y **Render** (free tier, no pide tarjeta) para `apps/api`. La base de datos ya vive en Supabase.
 
-> Nota sobre el free tier de Render: el servicio se "duerme" tras ~15 minutos sin requests, y el primer request después de eso tarda unos 30-50 segundos en despertar. Para un grupo chico de amigos que entra de vez en cuando es un trade-off aceptable a cambio de no pagar nada.
+> Nota sobre el free tier de Render: el servicio se "duerme" tras ~15 minutos sin requests, y el primer request después de eso tarda unos 30-50 segundos en despertar. Hay un [workflow de GitHub Actions](.github/workflows/keep-api-awake.yml) que pinguea `GET /health` cada 10 minutos para evitar esto — corre gratis porque el repo es público. Solo falta setearle la URL (ver paso 6 abajo).
 
 ### 1. Backend (`apps/api`) en Render
 
@@ -95,3 +95,7 @@ La app se despliega gratis en dos servicios separados: **Vercel** para `apps/web
 ### 3. Cerrar el CORS
 
 Volver a Render y setear `WEB_URL` con la URL de Vercel del paso 2, para que el backend solo acepte requests desde el frontend en producción (en local, sin esa variable, el CORS queda abierto).
+
+### 4. Evitar que el backend se duerma (opcional)
+
+En GitHub: `Settings` → `Secrets and variables` → `Actions` → pestaña `Variables` → **New repository variable**, nombre `API_URL`, valor la URL de Render (sin `/` al final, ej. `https://activigo-api.onrender.com`). El workflow ya programado empieza a pinguear `/health` cada 10 minutos automáticamente.

@@ -4,6 +4,7 @@ import { AuthModule } from "./auth/auth.module";
 import { ActivitiesModule } from "./modules/activities/activities.module";
 import { SignupsModule } from "./modules/signups/signups.module";
 import { SuggestionsModule } from "./modules/suggestions/suggestions.module";
+import { AppController } from "./app.controller";
 
 @Module({
   imports: [
@@ -13,5 +14,6 @@ import { SuggestionsModule } from "./modules/suggestions/suggestions.module";
     SignupsModule,
     SuggestionsModule,
   ],
+  controllers: [AppController],
 })
 export class AppModule {}
