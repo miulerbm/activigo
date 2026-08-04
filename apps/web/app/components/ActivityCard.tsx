@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Calendar, MapPin } from "lucide-react";
-import type { ActivityItem } from "../lib/mock-data";
+import type { Activity } from "../lib/api-client";
 import { StatusBadge } from "./StatusBadge";
 import { TagBadge } from "./TagBadge";
 import { CapacityBar } from "./CapacityBar";
@@ -18,7 +18,7 @@ function formatDate(iso: string | null) {
   });
 }
 
-export function ActivityCard({ activity }: { activity: ActivityItem }) {
+export function ActivityCard({ activity }: { activity: Activity }) {
   const formattedDate = formatDate(activity.date);
 
   return (
@@ -63,7 +63,7 @@ export function ActivityCard({ activity }: { activity: ActivityItem }) {
             </span>
           )}
           <CapacityBar
-            current={activity.signups.length}
+            current={activity.signupsCount}
             max={activity.maxCapacity}
           />
         </div>

@@ -6,11 +6,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { ShieldCheck } from "lucide-react";
 import { loginSchema, type LoginInput } from "@activigo/shared";
+import { ApiError, login } from "../../lib/api-client";
 import { Label } from "../../components/ui/label";
 import { Input } from "../../components/ui/input";
 import { Button } from "../../components/ui/button";
-
-const ADMIN_TOKEN_KEY = "activigo_admin_token";
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -23,13 +22,14 @@ export default function AdminLoginPage() {
     resolver: zodResolver(loginSchema),
   });
 
-  const onSubmit = async (_data: LoginInput) => {
-    // TODO: llamar a login(data) desde app/lib/api-client.ts y guardar el accessToken real
+  const onSubmit = async (data: LoginInput) => {
     try {
-      localStorage.setItem(ADMIN_TOKEN_KEY, "mock-token");
+      await login(data);
       router.push("/admin");
-    } catch {
-      toast.error("No se pudo iniciar sesión");
+    } catch (error) {
+      toast.error(
+        error instanceof ApiError ? error.message : "No se pudo iniciar sesión",
+      );
     }
   };
 

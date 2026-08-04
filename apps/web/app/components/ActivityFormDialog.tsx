@@ -17,7 +17,7 @@ import { Textarea } from "./ui/textarea";
 import { Button } from "./ui/button";
 import { STATUS_LABELS } from "./StatusBadge";
 import { TAG_LABELS } from "./TagBadge";
-import type { ActivityItem } from "../lib/mock-data";
+import type { Activity } from "../lib/api-client";
 
 function toDatetimeLocal(iso: string | null | undefined) {
   if (!iso) return "";
@@ -27,7 +27,7 @@ function toDatetimeLocal(iso: string | null | undefined) {
   return local.toISOString().slice(0, 16);
 }
 
-function buildDefaultValues(activity?: ActivityItem | null): CreateActivityInput {
+function buildDefaultValues(activity?: Activity | null): CreateActivityInput {
   if (!activity) {
     return {
       title: "",
@@ -57,7 +57,7 @@ function buildDefaultValues(activity?: ActivityItem | null): CreateActivityInput
 interface ActivityFormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  activity?: ActivityItem | null;
+  activity?: Activity | null;
   onSubmit: (data: CreateActivityInput) => void;
 }
 

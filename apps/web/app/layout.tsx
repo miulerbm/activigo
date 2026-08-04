@@ -1,14 +1,27 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { CalendarHeart } from "lucide-react";
+import { CalendarHeart, Lock } from "lucide-react";
 import "./globals.css";
 import { ThemeProvider } from "./components/theme-provider";
 import { ThemeToggle } from "./components/ThemeToggle";
 import { ThemedToaster } from "./components/ThemedToaster";
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: "Activigo",
   description: "Actividades recreativas para el grupo",
+  openGraph: {
+    title: "Activigo",
+    description: "Actividades recreativas para el grupo",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Activigo",
+    description: "Actividades recreativas para el grupo",
+  },
 };
 
 export default function RootLayout({
@@ -36,13 +49,15 @@ export default function RootLayout({
                 >
                   Sugerir actividad
                 </Link>
+                <ThemeToggle />
                 <Link
                   href="/admin/login"
-                  className="hover:text-slate-900 dark:hover:text-white"
+                  title="Solo dale acá si eres molver :v"
+                  aria-label="Admin"
+                  className="text-slate-300 hover:text-slate-500 dark:text-slate-700 dark:hover:text-slate-500"
                 >
-                  Admin
+                  <Lock className="h-3.5 w-3.5" />
                 </Link>
-                <ThemeToggle />
               </div>
             </nav>
           </header>

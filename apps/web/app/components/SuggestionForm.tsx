@@ -7,6 +7,7 @@ import {
   createSuggestionSchema,
   type CreateSuggestionInput,
 } from "@activigo/shared";
+import { ApiError, createSuggestion } from "../lib/api-client";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
@@ -23,10 +24,15 @@ export function SuggestionForm() {
   });
 
   const onSubmit = async (data: CreateSuggestionInput) => {
-    // TODO: llamar a createSuggestion(data) desde app/lib/api-client.ts
-    console.log("suggestion mock submit", data);
-    toast.success("¡Gracias! (demo local, todavía no conectado al backend)");
-    reset();
+    try {
+      await createSuggestion(data);
+      toast.success("¡Gracias! La vamos a revisar.");
+      reset();
+    } catch (error) {
+      toast.error(
+        error instanceof ApiError ? error.message : "No se pudo enviar la sugerencia",
+      );
+    }
   };
 
   return (

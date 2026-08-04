@@ -1,14 +1,17 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { createSignupSchema, type CreateSignupInput } from "@activigo/shared";
+import { ApiError, createSignup } from "../lib/api-client";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 
 export function SignupForm({ activityId }: { activityId: string }) {
+  const router = useRouter();
   const {
     register,
     handleSubmit,
@@ -19,10 +22,16 @@ export function SignupForm({ activityId }: { activityId: string }) {
   });
 
   const onSubmit = async (data: CreateSignupInput) => {
-    // TODO: llamar a createSignup(activityId, data) desde app/lib/api-client.ts
-    console.log("signup mock submit", activityId, data);
-    toast.success(`¡Listo ${data.name}! (demo local, todavía no conectado al backend)`);
-    reset();
+    try {
+      await createSignup(activityId, data);
+      toast.success(`¡Listo ${data.name}! Ya estás anotado.`);
+      reset();
+      router.refresh();
+    } catch (error) {
+      toast.error(
+        error instanceof ApiError ? error.message : "No se pudo completar la inscripción",
+      );
+    }
   };
 
   return (
