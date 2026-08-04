@@ -16,6 +16,10 @@ const optionalCoercedPositiveInt = z.preprocess(
   emptyToUndefined,
   z.coerce.number().int().positive().optional(),
 );
+const optionalImageUrl = z.preprocess(
+  emptyToUndefined,
+  z.string().trim().url("Tiene que ser una URL válida").optional(),
+);
 
 export const createActivitySchema = z.object({
   title: z.string().trim().min(1, "El título es obligatorio").max(120),
@@ -23,6 +27,7 @@ export const createActivitySchema = z.object({
   status: activityStatusSchema.optional(),
   tags: z.array(activityTagSchema).default([]),
   location: z.string().trim().max(200).optional(),
+  imageUrl: optionalImageUrl,
   date: optionalCoercedDate,
   signupDeadline: optionalCoercedDate,
   maxCapacity: optionalCoercedPositiveInt,

@@ -22,6 +22,7 @@ export interface Activity {
   status: ActivityStatus;
   tags: ActivityTag[];
   location: string | null;
+  imageUrl: string | null;
   date: string | null;
   signupDeadline: string | null;
   maxCapacity: number | null;

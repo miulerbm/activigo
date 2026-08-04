@@ -2,13 +2,7 @@
 
 import { ActivityStatus } from "@activigo/shared";
 import { cn } from "../lib/utils";
-
-const STATUS_LABELS: Record<ActivityStatus, string> = {
-  [ActivityStatus.PUEDE_SER]: "Puede ser",
-  [ActivityStatus.NIKA_Y_SI_SI]: "Nika y sí sí",
-  [ActivityStatus.GO_DE_UNA]: "Go de una",
-  [ActivityStatus.CANCELADO]: "Cancelado",
-};
+import { STATUS_LABELS } from "./StatusBadge";
 
 interface StatusFilterProps {
   value: ActivityStatus | null;
@@ -18,7 +12,7 @@ interface StatusFilterProps {
 const pillBase =
   "rounded-full border px-3 py-1 text-xs font-medium transition-colors";
 const pillActive =
-  "border-slate-900 bg-slate-900 text-white dark:border-slate-100 dark:bg-slate-100 dark:text-slate-900";
+  "border-transparent bg-gradient-to-r from-violet-600 to-fuchsia-500 text-white dark:from-violet-500 dark:to-fuchsia-400";
 const pillInactive =
   "border-slate-300 text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800";
 

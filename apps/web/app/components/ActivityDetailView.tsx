@@ -27,7 +27,16 @@ export function ActivityDetailView({
 }) {
   return (
     <div className="space-y-6">
-      <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      <div className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        {activity.imageUrl && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={activity.imageUrl}
+            alt=""
+            className="h-48 w-full object-cover sm:h-64"
+          />
+        )}
+        <div className="p-5">
         <div className="flex items-start justify-between gap-2">
           <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">
             {activity.title}
@@ -88,6 +97,7 @@ export function ActivityDetailView({
             </dd>
           </div>
         </dl>
+        </div>
       </div>
 
       <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">

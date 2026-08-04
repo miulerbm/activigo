@@ -8,6 +8,7 @@ export class ActivityEntity {
     public status: ActivityStatus,
     public tags: ActivityTag[],
     public location: string | null,
+    public imageUrl: string | null,
     public date: Date | null,
     public signupDeadline: Date | null,
     public maxCapacity: number | null,

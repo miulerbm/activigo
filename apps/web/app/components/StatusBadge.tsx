@@ -2,7 +2,7 @@ import { ActivityStatus } from "@activigo/shared";
 
 export const STATUS_LABELS: Record<ActivityStatus, string> = {
   [ActivityStatus.PUEDE_SER]: "Puede ser",
-  [ActivityStatus.NIKA_Y_SI_SI]: "Nika y sí sí",
+  [ActivityStatus.NIKA_Y_SI_SI]: "Nika, but ¿y si sí?",
   [ActivityStatus.GO_DE_UNA]: "Go de una",
   [ActivityStatus.CANCELADO]: "Cancelado",
 };

@@ -13,7 +13,7 @@ interface TagFilterProps {
 const pillBase =
   "inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-medium transition-colors";
 const pillActive =
-  "border-sky-700 bg-sky-700 text-white dark:border-sky-500 dark:bg-sky-600";
+  "border-transparent bg-gradient-to-r from-violet-600 to-fuchsia-500 text-white dark:from-violet-500 dark:to-fuchsia-400";
 const pillInactive =
   "border-slate-300 text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800";
 

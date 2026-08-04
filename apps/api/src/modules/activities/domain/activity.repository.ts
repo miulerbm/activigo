@@ -14,6 +14,7 @@ export interface CreateActivityData {
   status?: ActivityStatus;
   tags: ActivityTag[];
   location?: string;
+  imageUrl?: string;
   date?: Date;
   signupDeadline?: Date;
   maxCapacity?: number;

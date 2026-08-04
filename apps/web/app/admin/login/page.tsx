@@ -1,18 +1,25 @@
 "use client";
 
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { ShieldCheck } from "lucide-react";
 import { loginSchema, type LoginInput } from "@activigo/shared";
-import { ApiError, login } from "../../lib/api-client";
+import { ApiError, hasValidAdminSession, login } from "../../lib/api-client";
 import { Label } from "../../components/ui/label";
 import { Input } from "../../components/ui/input";
 import { Button } from "../../components/ui/button";
 
 export default function AdminLoginPage() {
   const router = useRouter();
+
+  useEffect(() => {
+    if (hasValidAdminSession()) {
+      router.replace("/admin");
+    }
+  }, [router]);
 
   const {
     register,

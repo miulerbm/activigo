@@ -35,6 +35,7 @@ function buildDefaultValues(activity?: Activity | null): CreateActivityInput {
       status: ActivityStatus.PUEDE_SER,
       tags: [],
       location: undefined,
+      imageUrl: undefined,
       date: undefined,
       signupDeadline: undefined,
       maxCapacity: undefined,
@@ -46,6 +47,7 @@ function buildDefaultValues(activity?: Activity | null): CreateActivityInput {
     status: activity.status,
     tags: activity.tags,
     location: activity.location ?? undefined,
+    imageUrl: activity.imageUrl ?? undefined,
     date: activity.date ? (toDatetimeLocal(activity.date) as unknown as Date) : undefined,
     signupDeadline: activity.signupDeadline
       ? (toDatetimeLocal(activity.signupDeadline) as unknown as Date)
@@ -174,6 +176,22 @@ export function ActivityFormDialog({
           <div>
             <Label htmlFor="location">Lugar</Label>
             <Input id="location" className="mt-1" {...register("location")} />
+          </div>
+
+          <div>
+            <Label htmlFor="imageUrl">URL de imagen</Label>
+            <Input
+              id="imageUrl"
+              type="url"
+              placeholder="https://..."
+              className="mt-1"
+              {...register("imageUrl")}
+            />
+            {errors.imageUrl && (
+              <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                {errors.imageUrl.message}
+              </p>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-3">

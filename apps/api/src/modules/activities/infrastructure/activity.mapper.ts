@@ -12,6 +12,7 @@ export class ActivityMapper {
       raw.status as ActivityEntity["status"],
       raw.tags as ActivityEntity["tags"],
       raw.location,
+      raw.imageUrl,
       raw.date,
       raw.signupDeadline,
       raw.maxCapacity,

@@ -5,12 +5,35 @@ import { motion } from "framer-motion";
 import { ActivityStatus, ActivityTag } from "@activigo/shared";
 import type { Activity } from "../lib/api-client";
 import { ActivityCard } from "./ActivityCard";
+import { HeroBanner } from "./HeroBanner";
 import { StatusFilter } from "./StatusFilter";
 import { TagFilter } from "./TagFilter";
+
+function pickFeatured(activities: Activity[]): Activity | null {
+  if (activities.length === 0) return null;
+
+  const now = Date.now();
+  const upcoming = activities
+    .filter(
+      (a) =>
+        a.status !== ActivityStatus.CANCELADO &&
+        a.date &&
+        new Date(a.date).getTime() >= now,
+    )
+    .sort((a, b) => new Date(a.date!).getTime() - new Date(b.date!).getTime());
+
+  if (upcoming.length > 0) return upcoming[0];
+
+  return [...activities].sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+  )[0];
+}
 
 export function ActivitiesBrowser({ activities }: { activities: Activity[] }) {
   const [status, setStatus] = useState<ActivityStatus | null>(null);
   const [tags, setTags] = useState<ActivityTag[]>([]);
+
+  const featured = useMemo(() => pickFeatured(activities), [activities]);
 
   const filtered = useMemo(() => {
     return activities.filter((activity) => {
@@ -23,6 +46,8 @@ export function ActivitiesBrowser({ activities }: { activities: Activity[] }) {
 
   return (
     <div className="space-y-6">
+      {featured && <HeroBanner activity={featured} />}
+
       <div>
         <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
           Actividades
