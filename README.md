@@ -77,7 +77,7 @@ La app se despliega gratis en dos servicios separados: **Vercel** para `apps/web
 3. Configuración:
    - **Root Directory**: dejar vacío (raíz del repo — así `pnpm` resuelve bien el workspace).
    - **Runtime**: Node
-   - **Build Command**: `corepack enable && pnpm install --frozen-lockfile && pnpm --filter @activigo/shared build && pnpm --filter api build`
+   - **Build Command**: `corepack enable && pnpm install --frozen-lockfile && pnpm --filter @activigo/shared build && pnpm --filter api exec prisma generate && pnpm --filter api build`
    - **Start Command**: `pnpm --filter api exec prisma migrate deploy && pnpm --filter api start`
    - **Instance Type**: Free
 4. Variables de entorno (las mismas que `apps/api/.env.example`): `DATABASE_URL`, `JWT_SECRET`, `ADMIN_PASSWORD`. No hace falta setear `PORT` — Render inyecta el suyo y `main.ts` ya lo lee. `WEB_URL` se completa en el paso 3.
