@@ -66,27 +66,32 @@ App para publicar actividades recreativas a un grupo cerrado de amigos, comparti
 
 ## Deploy
 
-La app se despliega en dos servicios separados: **Vercel** para `apps/web` y **Railway** para `apps/api`. La base de datos ya vive en Supabase.
+La app se despliega gratis en dos servicios separados: **Vercel** para `apps/web` y **Render** (free tier, no pide tarjeta) para `apps/api`. La base de datos ya vive en Supabase.
 
-### 1. Backend (`apps/api`) en Railway
+> Nota sobre el free tier de Render: el servicio se "duerme" tras ~15 minutos sin requests, y el primer request después de eso tarda unos 30-50 segundos en despertar. Para un grupo chico de amigos que entra de vez en cuando es un trade-off aceptable a cambio de no pagar nada.
 
-1. Crear un nuevo proyecto en [Railway](https://railway.app) a partir de este repo de GitHub.
-2. En la configuración del servicio:
-   - **Root directory**: `apps/api`
-   - **Build command**: `pnpm --filter @activigo/shared build && pnpm --filter api build`
-   - **Start command**: `pnpm --filter api exec prisma migrate deploy && pnpm --filter api start`
-3. Variables de entorno (las mismas que `apps/api/.env.example`): `DATABASE_URL`, `JWT_SECRET`, `ADMIN_PASSWORD`, `PORT` (Railway suele setear su propio `PORT`, dejá que lo use). `WEB_URL` se completa en el paso 3.
-4. Deploy, y copiar la URL pública que da Railway (algo como `https://activigo-api.up.railway.app`).
+### 1. Backend (`apps/api`) en Render
+
+1. Crear cuenta en [Render](https://render.com) (podés loguearte directo con GitHub).
+2. **New +** → **Web Service**, y conectar el repo `miulerbm/activigo`.
+3. Configuración:
+   - **Root Directory**: dejar vacío (raíz del repo — así `pnpm` resuelve bien el workspace).
+   - **Runtime**: Node
+   - **Build Command**: `corepack enable && pnpm install --frozen-lockfile && pnpm --filter @activigo/shared build && pnpm --filter api build`
+   - **Start Command**: `pnpm --filter api exec prisma migrate deploy && pnpm --filter api start`
+   - **Instance Type**: Free
+4. Variables de entorno (las mismas que `apps/api/.env.example`): `DATABASE_URL`, `JWT_SECRET`, `ADMIN_PASSWORD`. No hace falta setear `PORT` — Render inyecta el suyo y `main.ts` ya lo lee. `WEB_URL` se completa en el paso 3.
+5. Crear el servicio y esperar el primer deploy. Copiar la URL pública que da Render (algo como `https://activigo-api.onrender.com`).
 
 ### 2. Frontend (`apps/web`) en Vercel
 
-1. Importar el repo en [Vercel](https://vercel.com).
+1. Importar el repo en [Vercel](https://vercel.com) (tampoco pide tarjeta para el plan Hobby).
 2. **Root directory**: `apps/web` (Vercel detecta Next.js y pnpm workspaces automáticamente).
 3. Variables de entorno:
-   - `NEXT_PUBLIC_API_URL`: la URL de Railway del paso anterior.
+   - `NEXT_PUBLIC_API_URL`: la URL de Render del paso anterior.
    - `NEXT_PUBLIC_SITE_URL`: se completa después del primer deploy, con la URL que te da Vercel (y se vuelve a desplegar) — la necesita la imagen de Open Graph para armar URLs absolutas.
 4. Deploy.
 
 ### 3. Cerrar el CORS
 
-Volver a Railway y setear `WEB_URL` con la URL de Vercel del paso 2, para que el backend solo acepte requests desde el frontend en producción (en local, sin esa variable, el CORS queda abierto).
+Volver a Render y setear `WEB_URL` con la URL de Vercel del paso 2, para que el backend solo acepte requests desde el frontend en producción (en local, sin esa variable, el CORS queda abierto).
