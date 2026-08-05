@@ -13,6 +13,7 @@ export interface SuggestionRepository {
     id: string,
     status: SuggestionStatus,
   ): Promise<SuggestionEntity>;
+  delete(id: string): Promise<void>;
   findById(id: string): Promise<SuggestionEntity | null>;
   findMany(status?: SuggestionStatus): Promise<SuggestionEntity[]>;
 }

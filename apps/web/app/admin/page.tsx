@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { LogOut, Pencil, Plus, Check, X, Trash2 } from "lucide-react";
+import { LogOut, Pencil, Plus, Check, X, Trash2, Download } from "lucide-react";
 import {
   ActivityStatus,
   SuggestionStatus,
@@ -21,6 +21,7 @@ import {
   clearToken,
   createActivity,
   deleteActivity,
+  deleteSuggestion,
   hasValidAdminSession,
   listActivities,
   listSuggestions,
@@ -43,6 +44,9 @@ export default function AdminPage() {
     null,
   );
   const [deletingActivity, setDeletingActivity] = useState(false);
+  const [suggestionToDelete, setSuggestionToDelete] =
+    useState<Suggestion | null>(null);
+  const [deletingSuggestion, setDeletingSuggestion] = useState(false);
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -157,6 +161,38 @@ export default function AdminPage() {
       toast.error(
         error instanceof ApiError ? error.message : "No se pudo actualizar la sugerencia",
       );
+    }
+  }
+
+  async function handleDeleteSuggestion() {
+    if (!suggestionToDelete) return;
+    setDeletingSuggestion(true);
+    try {
+      await deleteSuggestion(suggestionToDelete.id);
+      toast.success(`Sugerencia de "${suggestionToDelete.name}" eliminada`);
+      setSuggestionToDelete(null);
+      await loadData();
+    } catch (error) {
+      toast.error(
+        error instanceof ApiError ? error.message : "No se pudo eliminar la sugerencia",
+      );
+    } finally {
+      setDeletingSuggestion(false);
+    }
+  }
+
+  async function handleDownloadImage(url: string, filename: string) {
+    try {
+      const res = await fetch(url);
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = filename;
+      link.click();
+      URL.revokeObjectURL(blobUrl);
+    } catch {
+      toast.error("No se pudo descargar la imagen");
     }
   }
 
@@ -285,38 +321,81 @@ export default function AdminPage() {
                   <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
                     {suggestion.description}
                   </p>
-                  {suggestion.status === SuggestionStatus.PENDIENTE && (
-                    <div className="mt-2 flex gap-2">
+
+                  {suggestion.imageUrl && (
+                    <div className="mt-2 flex items-center gap-3">
+                      <a
+                        href={suggestion.imageUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={suggestion.imageUrl}
+                          alt=""
+                          className="h-16 w-16 rounded-md object-cover"
+                        />
+                      </a>
                       <Button
                         type="button"
-                        variant="success"
+                        variant="outline"
                         size="sm"
                         onClick={() =>
-                          handleSuggestionStatus(
-                            suggestion.id,
-                            SuggestionStatus.APROBADA,
+                          handleDownloadImage(
+                            suggestion.imageUrl!,
+                            `${suggestion.name}-${suggestion.id}.jpg`,
                           )
                         }
                       >
-                        <Check className="h-3.5 w-3.5" />
-                        Aprobar
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        size="sm"
-                        onClick={() =>
-                          handleSuggestionStatus(
-                            suggestion.id,
-                            SuggestionStatus.DESCARTADA,
-                          )
-                        }
-                      >
-                        <X className="h-3.5 w-3.5" />
-                        Descartar
+                        <Download className="h-3.5 w-3.5" />
+                        Descargar
                       </Button>
                     </div>
                   )}
+
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {suggestion.status === SuggestionStatus.PENDIENTE && (
+                      <>
+                        <Button
+                          type="button"
+                          variant="success"
+                          size="sm"
+                          onClick={() =>
+                            handleSuggestionStatus(
+                              suggestion.id,
+                              SuggestionStatus.APROBADA,
+                            )
+                          }
+                        >
+                          <Check className="h-3.5 w-3.5" />
+                          Aprobar
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          onClick={() =>
+                            handleSuggestionStatus(
+                              suggestion.id,
+                              SuggestionStatus.DESCARTADA,
+                            )
+                          }
+                        >
+                          <X className="h-3.5 w-3.5" />
+                          Descartar
+                        </Button>
+                      </>
+                    )}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setSuggestionToDelete(suggestion)}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                      Eliminar
+                    </Button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -343,6 +422,20 @@ export default function AdminPage() {
         confirmLabel="Eliminar"
         onConfirm={handleDeleteActivity}
         loading={deletingActivity}
+      />
+
+      <ConfirmDialog
+        open={suggestionToDelete !== null}
+        onOpenChange={(open) => !open && setSuggestionToDelete(null)}
+        title="Eliminar sugerencia"
+        message={
+          suggestionToDelete
+            ? `¿Seguro que quieres eliminar la sugerencia de "${suggestionToDelete.name}"? No se puede deshacer.`
+            : ""
+        }
+        confirmLabel="Eliminar"
+        onConfirm={handleDeleteSuggestion}
+        loading={deletingSuggestion}
       />
     </div>
   );

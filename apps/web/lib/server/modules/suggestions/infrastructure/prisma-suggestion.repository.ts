@@ -26,6 +26,10 @@ export class PrismaSuggestionRepository implements SuggestionRepository {
     return SuggestionMapper.toDomain(suggestion);
   }
 
+  async delete(id: string): Promise<void> {
+    await this.prisma.suggestion.delete({ where: { id } });
+  }
+
   async findById(id: string): Promise<SuggestionEntity | null> {
     const suggestion = await this.prisma.suggestion.findUnique({
       where: { id },

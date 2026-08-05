@@ -230,6 +230,10 @@ export function changeSuggestionStatus(
   });
 }
 
+export function deleteSuggestion(id: string): Promise<void> {
+  return request<void>(`/suggestions/${id}`, { method: "DELETE", auth: true });
+}
+
 export async function uploadImage(
   file: File,
   prefix: "activities" | "suggestions",
