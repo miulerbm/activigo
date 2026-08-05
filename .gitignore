@@ -13,9 +13,6 @@ dist/
 .env.local
 .env.*.local
 
-# prisma
-apps/api/prisma/migrations/dev.db*
-
 # logs
 *.log
 npm-debug.log*
