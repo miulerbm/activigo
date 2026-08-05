@@ -5,9 +5,8 @@ App para publicar actividades recreativas a un grupo cerrado de amigos, comparti
 ## Stack
 
 - **Monorepo**: pnpm workspaces + Turborepo
-- **apps/web**: Next.js 14 (App Router), TypeScript, Tailwind CSS, React Hook Form + Zod
-- **apps/api**: NestJS, arquitectura limpia por módulo, Prisma, Postgres (Supabase)
-- **packages/shared**: enums y schemas Zod compartidos entre `web` y `api`
+- **apps/web**: Next.js 14 (App Router), TypeScript, Tailwind CSS, React Hook Form + Zod. El backend vive en el mismo proyecto como Route Handlers (`app/api/**`), con Prisma + Postgres (Supabase) — un único deploy, sin backend separado.
+- **packages/shared**: enums y schemas Zod compartidos entre el frontend y los Route Handlers
 
 ## Requisitos
 
@@ -26,14 +25,14 @@ App para publicar actividades recreativas a un grupo cerrado de amigos, comparti
 2. Configurar variables de entorno:
 
    ```bash
-   cp apps/api/.env.example apps/api/.env
    cp apps/web/.env.example apps/web/.env
    ```
 
-   En `apps/api/.env` completá:
-   - `DATABASE_URL`: connection string de tu proyecto de Supabase (Postgres).
+   En `apps/web/.env` completá:
+   - `DATABASE_URL`: connection string de tu proyecto de Supabase (Postgres). Usá el **Session Pooler** (no la conexión directa — es IPv6-only y falla desde redes IPv4).
    - `JWT_SECRET`: cualquier string largo y random.
    - `ADMIN_PASSWORD`: la contraseña que vas a usar para entrar a `/admin`.
+   - `NEXT_PUBLIC_SITE_URL`: `http://localhost:3000` en desarrollo.
 
 3. Generar el cliente de Prisma y aplicar las migraciones contra tu base:
 
@@ -44,7 +43,7 @@ App para publicar actividades recreativas a un grupo cerrado de amigos, comparti
 
    Esto crea las tablas `Activity`, `Signup` y `Suggestion` en tu base de Supabase.
 
-4. Levantar todo en modo desarrollo (api en `:3001`, web en `:3000`):
+4. Levantar el servidor de desarrollo (`:3000`):
 
    ```bash
    pnpm dev
@@ -61,41 +60,17 @@ App para publicar actividades recreativas a un grupo cerrado de amigos, comparti
 
 ## Estado actual
 
-- `apps/api` está completo: los tres módulos (`activities`, `signups`, `suggestions`) implementan las 4 capas de arquitectura limpia (`domain` / `application` / `infrastructure` / `presentation`), autenticación de admin por JWT, y validación con los schemas Zod de `packages/shared`.
-- `apps/web` está completo y conectado al backend real vía `apps/web/app/lib/api-client.ts` (sin mocks).
+`apps/web` está completo: frontend y backend (Route Handlers en `app/api/**`) viven en la misma app Next.js, con los tres módulos (`activities`, `signups`, `suggestions`) implementados como casos de uso planos sobre Prisma, autenticación de admin por JWT, y validación con los schemas Zod de `packages/shared`.
 
 ## Deploy
 
-La app se despliega gratis en dos servicios separados: **Vercel** para `apps/web` y **Render** (free tier, no pide tarjeta) para `apps/api`. La base de datos ya vive en Supabase.
+Todo se despliega en un único proyecto de **Vercel** (plan Hobby, gratis). La base de datos vive en Supabase. Al estar frontend y backend en el mismo deploy, no hay CORS que configurar ni servicios que se duerman — las funciones serverless de Vercel arrancan en cientos de milisegundos.
 
-> Nota sobre el free tier de Render: el servicio se "duerme" tras ~15 minutos sin requests, y el primer request después de eso tarda unos 30-50 segundos en despertar. Hay un [workflow de GitHub Actions](.github/workflows/keep-api-awake.yml) que pinguea `GET /health` cada 10 minutos para evitar esto — corre gratis porque el repo es público. Solo falta setearle la URL (ver paso 6 abajo).
-
-### 1. Backend (`apps/api`) en Render
-
-1. Crear cuenta en [Render](https://render.com) (puedes iniciar sesión directo con GitHub).
-2. **New +** → **Web Service**, y conectar el repo `miulerbm/activigo`.
-3. Configuración:
-   - **Root Directory**: dejar vacío (raíz del repo — así `pnpm` resuelve bien el workspace).
-   - **Runtime**: Node
-   - **Build Command**: `corepack enable && pnpm install --frozen-lockfile && pnpm --filter @activigo/shared build && pnpm --filter api exec prisma generate && pnpm --filter api build`
-   - **Start Command**: `pnpm --filter api exec prisma migrate deploy && pnpm --filter api start`
-   - **Instance Type**: Free
-4. Variables de entorno (las mismas que `apps/api/.env.example`): `DATABASE_URL`, `JWT_SECRET`, `ADMIN_PASSWORD`. No hace falta setear `PORT` — Render inyecta el suyo y `main.ts` ya lo lee. `WEB_URL` se completa en el paso 3.
-5. Crear el servicio y esperar el primer deploy. Copiar la URL pública que da Render (algo como `https://activigo-api.onrender.com`).
-
-### 2. Frontend (`apps/web`) en Vercel
-
-1. Importar el repo en [Vercel](https://vercel.com) (tampoco pide tarjeta para el plan Hobby).
+1. Importar el repo en [Vercel](https://vercel.com).
 2. **Root directory**: `apps/web` (Vercel detecta Next.js y pnpm workspaces automáticamente).
-3. Variables de entorno:
-   - `NEXT_PUBLIC_API_URL`: la URL de Render del paso anterior.
-   - `NEXT_PUBLIC_SITE_URL`: se completa después del primer deploy, con la URL que te da Vercel (y se vuelve a desplegar) — la necesita la imagen de Open Graph para armar URLs absolutas.
-4. Deploy.
-
-### 3. Cerrar el CORS
-
-Volver a Render y setear `WEB_URL` con la URL de Vercel del paso 2, para que el backend solo acepte requests desde el frontend en producción (en local, sin esa variable, el CORS queda abierto).
-
-### 4. Evitar que el backend se duerma (opcional)
-
-En GitHub: `Settings` → `Secrets and variables` → `Actions` → pestaña `Variables` → **New repository variable**, nombre `API_URL`, valor la URL de Render (sin `/` al final, ej. `https://activigo-api.onrender.com`). El workflow ya programado empieza a pinguear `/health` cada 10 minutos automáticamente.
+3. Variables de entorno (las mismas que `apps/web/.env.example`):
+   - `DATABASE_URL`: connection string del Session Pooler de Supabase.
+   - `JWT_SECRET`: string largo y random.
+   - `ADMIN_PASSWORD`: contraseña de acceso a `/admin`.
+   - `NEXT_PUBLIC_SITE_URL`: se completa después del primer deploy, con la URL que te da Vercel (y se vuelve a desplegar) — la necesitan las páginas server-side y la imagen de Open Graph para armar URLs absolutas.
+4. Deploy. Prisma corre `prisma generate` automáticamente en el `postinstall`; las migraciones (`prisma migrate deploy`) hay que aplicarlas manualmente contra la base de producción (ej. corriendo `pnpm db:migrate` en local apuntando al `DATABASE_URL` de producción) antes de cada deploy que agregue una migración nueva.

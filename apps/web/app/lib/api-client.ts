@@ -12,7 +12,12 @@ import type {
   UpdateActivityInput,
 } from "@activigo/shared";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
+// En el navegador, "/api" alcanza. En el servidor (Server Components) fetch()
+// necesita una URL absoluta -- no resuelve rutas relativas como el navegador.
+const API_URL =
+  typeof window === "undefined"
+    ? `${process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"}/api`
+    : "/api";
 const ADMIN_TOKEN_KEY = "activigo_admin_token";
 
 export interface Activity {
