@@ -1,6 +1,6 @@
 "use client";
 
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import {
@@ -12,10 +12,12 @@ import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 import { Button } from "./ui/button";
+import { ImageUploadField } from "./ImageUploadField";
 
 export function SuggestionForm() {
   const {
     register,
+    control,
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
@@ -68,6 +70,19 @@ export function SuggestionForm() {
           </p>
         )}
       </div>
+
+      <Controller
+        name="imageUrl"
+        control={control}
+        render={({ field }) => (
+          <ImageUploadField
+            label="Imagen referencial (opcional)"
+            value={field.value}
+            onChange={field.onChange}
+            prefix="suggestions"
+          />
+        )}
+      />
 
       <Button type="submit" disabled={isSubmitting} className="w-full">
         Enviar sugerencia

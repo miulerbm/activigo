@@ -15,6 +15,7 @@ model Activity {
   tags           ActivityTag[]
   location       String?
   imageUrl       String?
+  featured       Boolean        @default(false)
   date           DateTime?
   signupDeadline DateTime?
   maxCapacity    Int?
@@ -39,7 +40,7 @@ enum ActivityTag {
 model Signup {
   id         String   @id @default(cuid())
   activityId String
-  activity   Activity @relation(fields: [activityId], references: [id])
+  activity   Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
   name       String
   createdAt  DateTime @default(now())
 
@@ -50,6 +51,7 @@ model Suggestion {
   id          String           @id @default(cuid())
   name        String
   description String
+  imageUrl    String?
   status      SuggestionStatus @default(PENDIENTE)
   createdAt   DateTime         @default(now())
 }

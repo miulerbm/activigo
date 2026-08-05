@@ -13,6 +13,7 @@ export class ActivityMapper {
       raw.tags as ActivityEntity["tags"],
       raw.location,
       raw.imageUrl,
+      raw.featured,
       raw.date,
       raw.signupDeadline,
       raw.maxCapacity,

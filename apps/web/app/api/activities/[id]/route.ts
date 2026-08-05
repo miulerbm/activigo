@@ -7,6 +7,7 @@ import { requireAdmin } from "../../../../lib/server/auth/require-admin";
 import { PrismaActivityRepository } from "../../../../lib/server/modules/activities/infrastructure/prisma-activity.repository";
 import { GetActivityByIdUseCase } from "../../../../lib/server/modules/activities/application/get-activity-by-id.use-case";
 import { UpdateActivityUseCase } from "../../../../lib/server/modules/activities/application/update-activity.use-case";
+import { DeleteActivityUseCase } from "../../../../lib/server/modules/activities/application/delete-activity.use-case";
 import type { UpdateActivityData } from "../../../../lib/server/modules/activities/domain/activity.repository";
 
 const activityRepository = new PrismaActivityRepository(prisma);
@@ -41,6 +42,19 @@ export async function PATCH(
       parsed.data as UpdateActivityData,
     );
     return NextResponse.json(activity);
+  } catch (error) {
+    return toErrorResponse(error);
+  }
+}
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: { id: string } },
+) {
+  try {
+    requireAdmin(request);
+    await new DeleteActivityUseCase(activityRepository).execute(params.id);
+    return new NextResponse(null, { status: 204 });
   } catch (error) {
     return toErrorResponse(error);
   }

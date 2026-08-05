@@ -7,6 +7,7 @@ import type { Activity } from "../lib/api-client";
 import { StatusBadge } from "./StatusBadge";
 import { TagBadge } from "./TagBadge";
 import { CapacityBar } from "./CapacityBar";
+import { DateBadge } from "./DateBadge";
 
 function formatDate(iso: string | null) {
   if (!iso) return null;
@@ -59,11 +60,11 @@ export function ActivityCard({ activity }: { activity: Activity }) {
           </div>
 
           <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-slate-500 dark:text-slate-400">
-            {formattedDate && (
-              <span className="inline-flex items-center gap-1">
+            {formattedDate && activity.date && (
+              <DateBadge date={activity.date}>
                 <Calendar className="h-3.5 w-3.5" />
                 {formattedDate}
-              </span>
+              </DateBadge>
             )}
             {activity.location && (
               <span className="inline-flex items-center gap-1">

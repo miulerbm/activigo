@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useForm, type FieldErrors } from "react-hook-form";
+import { useForm, Controller, type FieldErrors } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import {
@@ -15,6 +15,8 @@ import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 import { Button } from "./ui/button";
+import { Switch } from "./ui/switch";
+import { ImageUploadField } from "./ImageUploadField";
 import { STATUS_LABELS } from "./StatusBadge";
 import { TAG_LABELS } from "./TagBadge";
 import type { Activity } from "../lib/api-client";
@@ -36,6 +38,7 @@ function buildDefaultValues(activity?: Activity | null): CreateActivityInput {
       tags: [],
       location: undefined,
       imageUrl: undefined,
+      featured: false,
       date: undefined,
       signupDeadline: undefined,
       maxCapacity: undefined,
@@ -48,6 +51,7 @@ function buildDefaultValues(activity?: Activity | null): CreateActivityInput {
     tags: activity.tags,
     location: activity.location ?? undefined,
     imageUrl: activity.imageUrl ?? undefined,
+    featured: activity.featured,
     date: activity.date ? (toDatetimeLocal(activity.date) as unknown as Date) : undefined,
     signupDeadline: activity.signupDeadline
       ? (toDatetimeLocal(activity.signupDeadline) as unknown as Date)
@@ -73,6 +77,7 @@ export function ActivityFormDialog({
 
   const {
     register,
+    control,
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
@@ -178,20 +183,36 @@ export function ActivityFormDialog({
             <Input id="location" className="mt-1" {...register("location")} />
           </div>
 
-          <div>
-            <Label htmlFor="imageUrl">URL de imagen</Label>
-            <Input
-              id="imageUrl"
-              type="url"
-              placeholder="https://..."
-              className="mt-1"
-              {...register("imageUrl")}
-            />
-            {errors.imageUrl && (
-              <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-                {errors.imageUrl.message}
-              </p>
+          <Controller
+            name="imageUrl"
+            control={control}
+            render={({ field }) => (
+              <ImageUploadField
+                value={field.value}
+                onChange={field.onChange}
+                prefix="activities"
+              />
             )}
+          />
+          {errors.imageUrl && (
+            <p className="-mt-3 text-sm text-red-600 dark:text-red-400">
+              {errors.imageUrl.message}
+            </p>
+          )}
+
+          <div className="flex items-center justify-between rounded-md border border-slate-200 px-3 py-2 dark:border-slate-800">
+            <Label htmlFor="featured">Destacada (aparece en el carrusel del inicio)</Label>
+            <Controller
+              name="featured"
+              control={control}
+              render={({ field }) => (
+                <Switch
+                  id="featured"
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              )}
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-3">

@@ -14,6 +14,15 @@ export class PrismaSignupRepository implements SignupRepository {
     return SignupMapper.toDomain(signup);
   }
 
+  async findById(id: string): Promise<SignupEntity | null> {
+    const signup = await this.prisma.signup.findUnique({ where: { id } });
+    return signup ? SignupMapper.toDomain(signup) : null;
+  }
+
+  async delete(id: string): Promise<void> {
+    await this.prisma.signup.delete({ where: { id } });
+  }
+
   async findByActivityId(activityId: string): Promise<SignupEntity[]> {
     const signups = await this.prisma.signup.findMany({
       where: { activityId },

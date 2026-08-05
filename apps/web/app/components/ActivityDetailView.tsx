@@ -1,11 +1,21 @@
 "use client";
 
-import { Calendar, Clock, MapPin, Users } from "lucide-react";
-import type { Activity, Signup } from "../lib/api-client";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import { Calendar, Clock, MapPin, Trash2, Users } from "lucide-react";
+import {
+  ApiError,
+  deleteSignup,
+  hasValidAdminSession,
+  type Activity,
+  type Signup,
+} from "../lib/api-client";
 import { StatusBadge } from "./StatusBadge";
 import { TagBadge } from "./TagBadge";
 import { CapacityBar } from "./CapacityBar";
+import { DateBadge } from "./DateBadge";
 import { SignupForm } from "./SignupForm";
+import { ConfirmDialog } from "./ConfirmDialog";
 
 function formatDate(iso: string | null) {
   if (!iso) return null;
@@ -20,11 +30,39 @@ function formatDate(iso: string | null) {
 
 export function ActivityDetailView({
   activity,
-  signups,
+  signups: initialSignups,
 }: {
   activity: Activity;
   signups: Signup[];
 }) {
+  const [signups, setSignups] = useState(initialSignups);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [signupToDelete, setSignupToDelete] = useState<Signup | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  useEffect(() => {
+    setIsAdmin(hasValidAdminSession());
+  }, []);
+
+  async function handleDeleteSignup() {
+    if (!signupToDelete) return;
+    setDeleting(true);
+    try {
+      await deleteSignup(activity.id, signupToDelete.id);
+      setSignups((prev) => prev.filter((s) => s.id !== signupToDelete.id));
+      toast.success(`Se quitó a "${signupToDelete.name}"`);
+      setSignupToDelete(null);
+    } catch (error) {
+      toast.error(
+        error instanceof ApiError
+          ? error.message
+          : "No se pudo quitar la inscripción",
+      );
+    } finally {
+      setDeleting(false);
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
@@ -63,7 +101,11 @@ export function ActivityDetailView({
                 <Calendar className="h-3.5 w-3.5" />
                 Fecha
               </dt>
-              <dd className="capitalize">{formatDate(activity.date)}</dd>
+              <dd className="capitalize">
+                <DateBadge date={activity.date}>
+                  {formatDate(activity.date)}
+                </DateBadge>
+              </dd>
             </div>
           )}
           {activity.location && (
@@ -122,14 +164,34 @@ export function ActivityDetailView({
             {signups.map((signup) => (
               <li
                 key={signup.id}
-                className="py-2 text-sm text-slate-700 dark:text-slate-300"
+                className="flex items-center justify-between py-2 text-sm text-slate-700 dark:text-slate-300"
               >
                 {signup.name}
+                {isAdmin && (
+                  <button
+                    type="button"
+                    onClick={() => setSignupToDelete(signup)}
+                    className="text-slate-400 hover:text-red-600 dark:text-slate-500 dark:hover:text-red-400"
+                    aria-label={`Quitar a ${signup.name}`}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                )}
               </li>
             ))}
           </ul>
         )}
       </div>
+
+      <ConfirmDialog
+        open={signupToDelete !== null}
+        onOpenChange={(open) => !open && setSignupToDelete(null)}
+        title="Quitar inscripción"
+        message={`¿Seguro que quieres quitar a "${signupToDelete?.name}" de esta actividad?`}
+        confirmLabel="Quitar"
+        onConfirm={handleDeleteSignup}
+        loading={deleting}
+      />
     </div>
   );
 }

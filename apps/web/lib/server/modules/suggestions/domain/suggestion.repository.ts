@@ -4,6 +4,7 @@ import { SuggestionEntity } from "./suggestion.entity";
 export interface CreateSuggestionData {
   name: string;
   description: string;
+  imageUrl?: string;
 }
 
 export interface SuggestionRepository {

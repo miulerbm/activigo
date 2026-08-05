@@ -41,6 +41,10 @@ export class PrismaActivityRepository implements ActivityRepository {
     return ActivityMapper.toDomain(activity);
   }
 
+  async delete(id: string): Promise<void> {
+    await this.prisma.activity.delete({ where: { id } });
+  }
+
   async findById(id: string): Promise<ActivityEntity | null> {
     const activity = await this.prisma.activity.findUnique({
       where: { id },
@@ -54,6 +58,7 @@ export class PrismaActivityRepository implements ActivityRepository {
       where: {
         status: filter.status,
         tags: filter.tag ? { has: filter.tag } : undefined,
+        featured: filter.featured,
       },
       include: { signups: true },
       orderBy: { createdAt: "desc" },

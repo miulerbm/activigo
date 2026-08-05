@@ -7,6 +7,7 @@ export class SuggestionMapper {
       raw.id,
       raw.name,
       raw.description,
+      raw.imageUrl,
       raw.status as SuggestionEntity["status"],
       raw.createdAt,
     );

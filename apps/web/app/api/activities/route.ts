@@ -7,7 +7,10 @@ import { requireAdmin } from "../../../lib/server/auth/require-admin";
 import { PrismaActivityRepository } from "../../../lib/server/modules/activities/infrastructure/prisma-activity.repository";
 import { ListActivitiesUseCase } from "../../../lib/server/modules/activities/application/list-activities.use-case";
 import { CreateActivityUseCase } from "../../../lib/server/modules/activities/application/create-activity.use-case";
-import type { CreateActivityData } from "../../../lib/server/modules/activities/domain/activity.repository";
+import type {
+  ActivityFilter,
+  CreateActivityData,
+} from "../../../lib/server/modules/activities/domain/activity.repository";
 
 const activityRepository = new PrismaActivityRepository(prisma);
 
@@ -17,8 +20,10 @@ export async function GET(request: Request) {
   if (!parsed.success) return parsed.response;
 
   try {
+    // Zod no infiere bien el campo `featured` (usa z.preprocess()) -- ya está
+    // validado en runtime, el cast es seguro.
     const activities = await new ListActivitiesUseCase(activityRepository).execute(
-      parsed.data,
+      parsed.data as ActivityFilter,
     );
     return NextResponse.json(activities);
   } catch (error) {

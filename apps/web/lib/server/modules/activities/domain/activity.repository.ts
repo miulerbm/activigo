@@ -4,6 +4,7 @@ import { ActivityEntity } from "./activity.entity";
 export interface ActivityFilter {
   status?: ActivityStatus;
   tag?: ActivityTag;
+  featured?: boolean;
 }
 
 export interface CreateActivityData {
@@ -13,6 +14,7 @@ export interface CreateActivityData {
   tags: ActivityTag[];
   location?: string;
   imageUrl?: string;
+  featured: boolean;
   date?: Date;
   signupDeadline?: Date;
   maxCapacity?: number;
@@ -24,6 +26,7 @@ export interface ActivityRepository {
   create(data: CreateActivityData): Promise<ActivityEntity>;
   update(id: string, data: UpdateActivityData): Promise<ActivityEntity>;
   changeStatus(id: string, status: ActivityStatus): Promise<ActivityEntity>;
+  delete(id: string): Promise<void>;
   findById(id: string): Promise<ActivityEntity | null>;
   findMany(filter: ActivityFilter): Promise<ActivityEntity[]>;
 }

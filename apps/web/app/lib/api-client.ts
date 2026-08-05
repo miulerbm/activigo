@@ -28,6 +28,7 @@ export interface Activity {
   tags: ActivityTag[];
   location: string | null;
   imageUrl: string | null;
+  featured: boolean;
   date: string | null;
   signupDeadline: string | null;
   maxCapacity: number | null;
@@ -46,6 +47,7 @@ export interface Suggestion {
   id: string;
   name: string;
   description: string;
+  imageUrl: string | null;
   status: SuggestionStatus;
   createdAt: string;
 }
@@ -141,7 +143,11 @@ function buildQuery(params: Record<string, string | undefined>): string {
 export function listActivities(
   filter?: ListActivitiesFilterInput,
 ): Promise<Activity[]> {
-  const query = buildQuery({ status: filter?.status, tag: filter?.tag });
+  const query = buildQuery({
+    status: filter?.status,
+    tag: filter?.tag,
+    featured: filter?.featured !== undefined ? String(filter.featured) : undefined,
+  });
   return request<Activity[]>(`/activities${query}`);
 }
 
@@ -175,6 +181,10 @@ export function changeActivityStatus(
   });
 }
 
+export function deleteActivity(id: string): Promise<void> {
+  return request<void>(`/activities/${id}`, { method: "DELETE", auth: true });
+}
+
 export function listSignupsByActivity(activityId: string): Promise<Signup[]> {
   return request<Signup[]>(`/activities/${activityId}/signups`);
 }
@@ -186,6 +196,16 @@ export function createSignup(
   return request<Signup>(`/activities/${activityId}/signups`, {
     method: "POST",
     body: data,
+  });
+}
+
+export function deleteSignup(
+  activityId: string,
+  signupId: string,
+): Promise<void> {
+  return request<void>(`/activities/${activityId}/signups/${signupId}`, {
+    method: "DELETE",
+    auth: true,
   });
 }
 
@@ -208,6 +228,33 @@ export function changeSuggestionStatus(
     body: data,
     auth: true,
   });
+}
+
+export async function uploadImage(
+  file: File,
+  prefix: "activities" | "suggestions",
+): Promise<{ url: string }> {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("prefix", prefix);
+
+  const res = await fetch(`${API_URL}/upload`, {
+    method: "POST",
+    body: formData,
+  });
+
+  if (!res.ok) {
+    let message = `Error ${res.status}`;
+    try {
+      const data = await res.json();
+      if (typeof data.message === "string") message = data.message;
+    } catch {
+      // sin body JSON, usamos el mensaje genérico
+    }
+    throw new ApiError(message, res.status);
+  }
+
+  return res.json() as Promise<{ url: string }>;
 }
 
 export async function login(data: LoginInput): Promise<{ accessToken: string }> {

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { LogOut, Pencil, Plus, Check, X } from "lucide-react";
+import { LogOut, Pencil, Plus, Check, X, Trash2 } from "lucide-react";
 import {
   ActivityStatus,
   SuggestionStatus,
@@ -13,12 +13,14 @@ import { StatusBadge, STATUS_LABELS } from "../components/StatusBadge";
 import { TagBadge } from "../components/TagBadge";
 import { Button } from "../components/ui/button";
 import { ActivityFormDialog } from "../components/ActivityFormDialog";
+import { ConfirmDialog } from "../components/ConfirmDialog";
 import {
   ApiError,
   changeActivityStatus,
   changeSuggestionStatus,
   clearToken,
   createActivity,
+  deleteActivity,
   hasValidAdminSession,
   listActivities,
   listSuggestions,
@@ -37,6 +39,10 @@ export default function AdminPage() {
   const [editingActivity, setEditingActivity] = useState<Activity | null>(
     null,
   );
+  const [activityToDelete, setActivityToDelete] = useState<Activity | null>(
+    null,
+  );
+  const [deletingActivity, setDeletingActivity] = useState(false);
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -103,6 +109,23 @@ export default function AdminPage() {
       toast.error(
         error instanceof ApiError ? error.message : "No se pudo guardar la actividad",
       );
+    }
+  }
+
+  async function handleDeleteActivity() {
+    if (!activityToDelete) return;
+    setDeletingActivity(true);
+    try {
+      await deleteActivity(activityToDelete.id);
+      toast.success(`"${activityToDelete.title}" eliminada`);
+      setActivityToDelete(null);
+      await loadData();
+    } catch (error) {
+      toast.error(
+        error instanceof ApiError ? error.message : "No se pudo eliminar la actividad",
+      );
+    } finally {
+      setDeletingActivity(false);
     }
   }
 
@@ -216,6 +239,15 @@ export default function AdminPage() {
                       <Pencil className="h-3.5 w-3.5" />
                       Editar
                     </Button>
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => setActivityToDelete(activity)}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                      Eliminar
+                    </Button>
                   </div>
                 </div>
               ))}
@@ -297,6 +329,20 @@ export default function AdminPage() {
         onOpenChange={setDialogOpen}
         activity={editingActivity}
         onSubmit={handleSaveActivity}
+      />
+
+      <ConfirmDialog
+        open={activityToDelete !== null}
+        onOpenChange={(open) => !open && setActivityToDelete(null)}
+        title="Eliminar actividad"
+        message={
+          activityToDelete
+            ? `¿Seguro que quieres eliminar "${activityToDelete.title}"? Esto también borra ${activityToDelete.signupsCount} inscripción(es). No se puede deshacer.`
+            : ""
+        }
+        confirmLabel="Eliminar"
+        onConfirm={handleDeleteActivity}
+        loading={deletingActivity}
       />
     </div>
   );

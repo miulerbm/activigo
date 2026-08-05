@@ -5,12 +5,15 @@ import { motion } from "framer-motion";
 import { ActivityStatus, ActivityTag } from "@activigo/shared";
 import type { Activity } from "../lib/api-client";
 import { ActivityCard } from "./ActivityCard";
-import { HeroBanner } from "./HeroBanner";
+import { FeaturedCarousel } from "./FeaturedCarousel";
 import { StatusFilter } from "./StatusFilter";
 import { TagFilter } from "./TagFilter";
 
-function pickFeatured(activities: Activity[]): Activity | null {
-  if (activities.length === 0) return null;
+// Cuando ninguna actividad está marcada como destacada, mostramos la próxima
+// más cercana (o la más reciente si no hay ninguna futura) para que el home
+// no quede vacío.
+function pickAutoFeatured(activities: Activity[]): Activity[] {
+  if (activities.length === 0) return [];
 
   const now = Date.now();
   const upcoming = activities
@@ -22,18 +25,32 @@ function pickFeatured(activities: Activity[]): Activity | null {
     )
     .sort((a, b) => new Date(a.date!).getTime() - new Date(b.date!).getTime());
 
-  if (upcoming.length > 0) return upcoming[0];
+  if (upcoming.length > 0) return [upcoming[0]];
 
-  return [...activities].sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-  )[0];
+  return [
+    [...activities].sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    )[0],
+  ];
+}
+
+function sortFeatured(activities: Activity[]): Activity[] {
+  return [...activities].sort((a, b) => {
+    if (a.date && b.date) return new Date(a.date).getTime() - new Date(b.date).getTime();
+    if (a.date) return -1;
+    if (b.date) return 1;
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  });
 }
 
 export function ActivitiesBrowser({ activities }: { activities: Activity[] }) {
   const [status, setStatus] = useState<ActivityStatus | null>(null);
   const [tags, setTags] = useState<ActivityTag[]>([]);
 
-  const featured = useMemo(() => pickFeatured(activities), [activities]);
+  const featured = useMemo(() => {
+    const marked = activities.filter((a) => a.featured);
+    return marked.length > 0 ? sortFeatured(marked) : pickAutoFeatured(activities);
+  }, [activities]);
 
   const filtered = useMemo(() => {
     return activities.filter((activity) => {
@@ -46,7 +63,7 @@ export function ActivitiesBrowser({ activities }: { activities: Activity[] }) {
 
   return (
     <div className="space-y-6">
-      {featured && <HeroBanner activity={featured} />}
+      {featured.length > 0 && <FeaturedCarousel activities={featured} />}
 
       <div>
         <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
